@@ -94,8 +94,9 @@ struct TogglesBlock: View {
     @State private var borderedOn = false
 
     private var code: String {
-        [
-            "Toggle(\"Switch 样式\", isOn: $switchOn)   // \(switchOn ? \"开\" : \"关\")",
+        let state = switchOn ? "开" : "关"
+        return [
+            "Toggle(\"Switch 样式\", isOn: $switchOn)   // 当前：\(state)",
             "Toggle(\"Button 样式\", isOn: $buttonOn)",
             "    .toggleStyle(.button)",
             "Toggle(\"图标开关\", isOn: $switchOn)",
@@ -129,10 +130,12 @@ struct ValueControlsBlock: View {
     @State private var count = 3
 
     private var code: String {
-        [
-            "Slider(value: $value)                // \(String(format: \"%.2f\", value))",
-            "Slider(value: $stepped, in: 0...10, step: 1)   // \(String(format: \"%.0f\", stepped))",
-            "Stepper(\"数量\", value: $count, in: 0...10)   // \(count)"
+        let fraction = String(format: "%.2f", value)
+        let integer = String(format: "%.0f", stepped)
+        return [
+            "Slider(value: $value)                  // 当前值 \(fraction)",
+            "Slider(value: $stepped, in: 0...10, step: 1)   // 当前值 \(integer)",
+            "Stepper(\"数量\", value: $count, in: 0...10)   // 当前值 \(count)"
         ].joined(separator: "\n")
     }
 
@@ -175,10 +178,11 @@ struct PickersBlock: View {
     private let options = ["轻触", "拖动", "长按"]
 
     private var code: String {
-        [
-            "Picker(\"菜单\", selection: $picked) { … }        // \(picked)",
+        let segmentText = "\(segment)"
+        return [
+            "Picker(\"菜单\", selection: $picked) { … }        // 当前：\(picked)",
             "Picker(\"分段\", selection: $segment) { … }",
-            "    .pickerStyle(.segmented)                    // \(segment)",
+            "    .pickerStyle(.segmented)                    // 当前：\(segmentText)",
             "Picker(\"滚轮\", selection: $segment) { … }",
             "    .pickerStyle(.wheel)",
             "Picker(\"内联\", selection: $picked) { … }",
@@ -258,12 +262,15 @@ struct ProgressBlock: View {
     @State private var gaugeValue: Double = 0.62
 
     private var code: String {
-        [
-            "ProgressView(value: \(String(format: \"%.2f\", progress)))   // \(Int(progress * 100))%",
+        let progressText = String(format: "%.2f", progress)
+        let gaugeText = String(format: "%.2f", gaugeValue)
+        let percent = Int(progress * 100)
+        return [
+            "ProgressView(value: \(progressText))            // 当前 \(percent)%",
             "ProgressView()                                  // 不确定态",
-            "Gauge(value: \(String(format: \"%.2f\", gaugeValue))) { Text(\"容量\") }",
+            "Gauge(value: \(gaugeText)) { Text(\"容量\") }",
             "    .gaugeStyle(.linearCapacity)",
-            "Gauge(value: \(String(format: \"%.2f\", gaugeValue))) { … }",
+            "Gauge(value: \(gaugeText)) { … }",
             "    .gaugeStyle(.accessoryCircularCapacity)"
         ].joined(separator: "\n")
     }
@@ -334,8 +341,9 @@ struct TextInputBlock: View {
     @State private var notes = "TextEditor：多行文本编辑器，可滚动。"
 
     private var code: String {
-        [
-            "TextField(\"单行\", text: $singleLine)   // \(singleLine)",
+        let current = singleLine
+        return [
+            "TextField(\"单行\", text: $singleLine)   // 当前：\(current)",
             "TextField(\"邮箱\", text: $email)",
             "    .keyboardType(.emailAddress)",
             "    .textInputAutocapitalization(.never)",
@@ -417,8 +425,9 @@ struct StructureBlock: View {
     @State private var symbolOn = true
 
     private var code: String {
-        [
-            "DisclosureGroup(\"高级选项\", isExpanded: $expanded) { … }   // \(expanded ? \"展开\" : \"收起\")",
+        let expandState = expanded ? "展开" : "收起"
+        return [
+            "DisclosureGroup(\"高级选项\", isExpanded: $expanded) { … }   // 当前：\(expandState)",
             "ControlGroup { Button(\"上一步\") {}; Button(\"下一步\") {} }",
             "Image(systemName: \"wifi\")",
             "    .symbolEffect(.variableColor.iterative, isActive: \(symbolOn))",
