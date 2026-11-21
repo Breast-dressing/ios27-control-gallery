@@ -89,3 +89,54 @@ struct TokenRow<Content: View>: View {
         }
     }
 }
+
+/// 贴在控件旁边的 API 名称（等宽，便于和代码里的符号对上）
+struct APICaption: View {
+    let api: String
+    var note: String? = nil
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text(api)
+                .font(.system(.caption2, design: .monospaced))
+                .foregroundStyle(.secondary)
+            if let note {
+                Text(note)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            Spacer(minLength: 0)
+        }
+    }
+}
+
+/// 可复制的 SwiftUI 示例代码块；code 由当前参数实时拼出来
+struct CodeBlock: View {
+    let api: String
+    let code: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: "chevron.left.forwardslash.chevron.right")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Text(api)
+                    .font(.system(.caption2, design: .monospaced))
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: 0)
+            }
+
+            Text(code)
+                .font(.system(.caption, design: .monospaced))
+                .textSelection(.enabled)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(10)
+                .background(
+                    Color(uiColor: .tertiarySystemFill),
+                    in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                )
+        }
+    }
+}

@@ -70,4 +70,45 @@ final class GalleryCatalogTests: XCTestCase {
         XCTAssertEqual(ColorSchemeChoice.dark.scheme, .dark)
         XCTAssertEqual(ListStyleChoice.allCases.count, 4)
     }
+
+    /// 页面里的示例代码由这些 modifier 拼接，参数一变代码必须跟着变
+    func testLiveCodeModifiersFollowStore() {
+        let store = GalleryStore()
+        XCTAssertEqual(store.dynamicTypeModifier, ".dynamicTypeSize(.large)")
+        XCTAssertEqual(store.fontDesignModifier, ".fontDesign(.default)")
+        XCTAssertEqual(store.fontWeightModifier, ".fontWeight(.regular)")
+        XCTAssertEqual(store.controlSizeModifier, ".controlSize(.regular)")
+        XCTAssertEqual(store.tintModifier, ".tint(.blue)")
+        XCTAssertEqual(store.colorSchemeModifier, "// 跟随系统：不设置 preferredColorScheme")
+        XCTAssertEqual(store.paddingSample, ".padding(16)")
+        XCTAssertEqual(store.listStyleSample, ".listStyle(.insetGrouped)")
+
+        store.dynamicTypeIndex = 11
+        XCTAssertEqual(store.dynamicTypeModifier, ".dynamicTypeSize(.accessibility5)")
+
+        store.fontDesignIndex = 2
+        XCTAssertEqual(store.fontDesignModifier, ".fontDesign(.rounded)")
+
+        store.fontWeightIndex = 6
+        XCTAssertEqual(store.fontWeightModifier, ".fontWeight(.bold)")
+
+        store.controlSizeIndex = 4
+        XCTAssertEqual(store.controlSizeModifier, ".controlSize(.extraLarge)")
+
+        store.tintIndex = 4
+        XCTAssertEqual(store.tintModifier, ".tint(.pink)")
+
+        store.colorSchemeChoice = .dark
+        XCTAssertEqual(store.colorSchemeModifier, ".preferredColorScheme(.dark)")
+
+        store.cornerRadius = 20
+        XCTAssertEqual(store.cornerRadiusSample, "RoundedRectangle(cornerRadius: 20, style: .continuous)")
+        XCTAssertEqual(store.buttonBorderShapeSample, ".buttonBorderShape(.roundedRectangle(radius: 20))")
+
+        store.spacingScale = 1.5
+        XCTAssertEqual(store.paddingSample, ".padding(24)")
+
+        store.listStyleChoice = .sidebar
+        XCTAssertEqual(store.listStyleSample, ".listStyle(.sidebar)")
+    }
 }

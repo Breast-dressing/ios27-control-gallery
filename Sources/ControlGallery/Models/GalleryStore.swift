@@ -100,4 +100,42 @@ final class GalleryStore: ObservableObject {
     var bodySpacing: CGFloat { 16 * scale }
 
     func spacingValue(_ base: CGFloat) -> CGFloat { base * scale }
+
+    // MARK: - 实时示例代码（参数一变，代码跟着变）
+
+    var fontDesignAPIName: String {
+        let names = [".default", ".serif", ".rounded", ".monospaced"]
+        let index = min(max(fontDesignIndex, 0), names.count - 1)
+        return names[index]
+    }
+
+    var dynamicTypeModifier: String { ".dynamicTypeSize(.\(dynamicTypeName))" }
+
+    var fontDesignModifier: String { ".fontDesign(\(fontDesignAPIName))" }
+
+    var fontWeightModifier: String { ".fontWeight(.\(fontWeightName))" }
+
+    var controlSizeModifier: String { ".controlSize(.\(controlSizeName))" }
+
+    var tintModifier: String { ".tint(.\(tintName))" }
+
+    var colorSchemeModifier: String {
+        switch colorSchemeChoice {
+        case .system: return "// 跟随系统：不设置 preferredColorScheme"
+        case .light: return ".preferredColorScheme(.light)"
+        case .dark: return ".preferredColorScheme(.dark)"
+        }
+    }
+
+    var cornerRadiusSample: String {
+        "RoundedRectangle(cornerRadius: \(Int(cornerRadius)), style: .continuous)"
+    }
+
+    var buttonBorderShapeSample: String {
+        ".buttonBorderShape(.roundedRectangle(radius: \(Int(min(cornerRadius, 22)))))"
+    }
+
+    var paddingSample: String { ".padding(\(Int(spacingValue(16))))" }
+
+    var listStyleSample: String { ".listStyle(.\(listStyleChoice.rawValue))" }
 }
