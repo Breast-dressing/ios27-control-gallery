@@ -27,17 +27,24 @@ struct ControlsSection: View {
 struct ButtonsBlock: View {
     @EnvironmentObject private var store: GalleryStore
 
+    private var code: String {
+        [
+            "Button(\"主要操作\") { }",
+            "    .buttonStyle(.borderedProminent)",
+            "    \(store.buttonBorderShapeSample)",
+            "    \(store.controlSizeModifier)",
+            "    \(store.tintModifier)"
+        ].joined(separator: "\n")
+    }
+
     var body: some View {
         Section {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     Button("默认") {}
-                    Button("Filled") {}
-                        .buttonStyle(.borderedProminent)
-                    Button("Bordered") {}
-                        .buttonStyle(.bordered)
-                    Button("Borderless") {}
-                        .buttonStyle(.borderless)
+                    Button("Filled") {}.buttonStyle(.borderedProminent)
+                    Button("Bordered") {}.buttonStyle(.bordered)
+                    Button("Borderless") {}.buttonStyle(.borderless)
                     Button {} label: {
                         Label("分享", systemImage: "square.and.arrow.up")
                     }
@@ -69,6 +76,8 @@ struct ButtonsBlock: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+
+            CodeBlock(api: "Button · ButtonStyle · ControlSize", code: code)
         } header: {
             Text("按钮 Button")
         } footer: {
@@ -84,6 +93,17 @@ struct TogglesBlock: View {
     @State private var buttonOn = true
     @State private var borderedOn = false
 
+    private var code: String {
+        [
+            "Toggle(\"Switch 样式\", isOn: $switchOn)   // \(switchOn ? \"开\" : \"关\")",
+            "Toggle(\"Button 样式\", isOn: $buttonOn)",
+            "    .toggleStyle(.button)",
+            "Toggle(\"图标开关\", isOn: $switchOn)",
+            "    .toggleStyle(.button)",
+            "    .tint(.pink)"
+        ].joined(separator: "\n")
+    }
+
     var body: some View {
         Section("开关 Toggle") {
             Toggle("Switch 样式", isOn: $switchOn)
@@ -95,6 +115,8 @@ struct TogglesBlock: View {
             Toggle("图标开关", isOn: $switchOn)
                 .toggleStyle(.button)
                 .tint(.pink)
+
+            CodeBlock(api: "Toggle · ToggleStyle", code: code)
         }
     }
 }
@@ -105,6 +127,14 @@ struct ValueControlsBlock: View {
     @State private var value: Double = 0.42
     @State private var stepped: Double = 3
     @State private var count = 3
+
+    private var code: String {
+        [
+            "Slider(value: $value)                // \(String(format: \"%.2f\", value))",
+            "Slider(value: $stepped, in: 0...10, step: 1)   // \(String(format: \"%.0f\", stepped))",
+            "Stepper(\"数量\", value: $count, in: 0...10)   // \(count)"
+        ].joined(separator: "\n")
+    }
 
     var body: some View {
         Section("滑块 Slider / 步进器 Stepper") {
@@ -130,6 +160,8 @@ struct ValueControlsBlock: View {
                 Label("带标签的步进器", systemImage: "plusminus.circle")
                     .labelStyle(.titleAndIcon)
             }
+
+            CodeBlock(api: "Slider · Stepper", code: code)
         }
     }
 }
@@ -141,6 +173,18 @@ struct PickersBlock: View {
     @State private var segment = 1
 
     private let options = ["轻触", "拖动", "长按"]
+
+    private var code: String {
+        [
+            "Picker(\"菜单\", selection: $picked) { … }        // \(picked)",
+            "Picker(\"分段\", selection: $segment) { … }",
+            "    .pickerStyle(.segmented)                    // \(segment)",
+            "Picker(\"滚轮\", selection: $segment) { … }",
+            "    .pickerStyle(.wheel)",
+            "Picker(\"内联\", selection: $picked) { … }",
+            "    .pickerStyle(.inline)"
+        ].joined(separator: "\n")
+    }
 
     var body: some View {
         Section("选择器 Picker") {
@@ -171,6 +215,8 @@ struct PickersBlock: View {
                 }
             }
             .pickerStyle(.inline)
+
+            CodeBlock(api: "Picker · PickerStyle", code: code)
         }
     }
 }
@@ -181,6 +227,16 @@ struct DateTimeColorBlock: View {
     @State private var date = Date()
     @State private var color = Color.blue
 
+    private var code: String {
+        [
+            "DatePicker(\"日期\", selection: $date, displayedComponents: .date)",
+            "DatePicker(\"图形\", selection: $date, displayedComponents: .date)",
+            "    .datePickerStyle(.graphical)",
+            "ColorPicker(\"颜色\", selection: $color, supportsOpacity: true)",
+            "ColorPicker(\"不带透明度\", selection: $color, supportsOpacity: false)"
+        ].joined(separator: "\n")
+    }
+
     var body: some View {
         Section("日期 DatePicker / 颜色 ColorPicker") {
             DatePicker("日期（紧凑）", selection: $date, displayedComponents: .date)
@@ -189,6 +245,8 @@ struct DateTimeColorBlock: View {
                 .datePickerStyle(.graphical)
             ColorPicker("颜色（含透明度）", selection: $color, supportsOpacity: true)
             ColorPicker("颜色（不含透明度）", selection: $color, supportsOpacity: false)
+
+            CodeBlock(api: "DatePicker · DatePickerStyle · ColorPicker", code: code)
         }
     }
 }
@@ -198,6 +256,17 @@ struct DateTimeColorBlock: View {
 struct ProgressBlock: View {
     @State private var progress: Double = 0.35
     @State private var gaugeValue: Double = 0.62
+
+    private var code: String {
+        [
+            "ProgressView(value: \(String(format: \"%.2f\", progress)))   // \(Int(progress * 100))%",
+            "ProgressView()                                  // 不确定态",
+            "Gauge(value: \(String(format: \"%.2f\", gaugeValue))) { Text(\"容量\") }",
+            "    .gaugeStyle(.linearCapacity)",
+            "Gauge(value: \(String(format: \"%.2f\", gaugeValue))) { … }",
+            "    .gaugeStyle(.accessoryCircularCapacity)"
+        ].joined(separator: "\n")
+    }
 
     var body: some View {
         Section("进度 ProgressView / 仪表 Gauge") {
@@ -249,6 +318,8 @@ struct ProgressBlock: View {
             }
 
             Slider(value: $gaugeValue)
+
+            CodeBlock(api: "ProgressView · ProgressViewStyle · Gauge · GaugeStyle", code: code)
         }
     }
 }
@@ -261,6 +332,19 @@ struct TextInputBlock: View {
     @State private var secret = "密码"
     @State private var multiline = "多行输入"
     @State private var notes = "TextEditor：多行文本编辑器，可滚动。"
+
+    private var code: String {
+        [
+            "TextField(\"单行\", text: $singleLine)   // \(singleLine)",
+            "TextField(\"邮箱\", text: $email)",
+            "    .keyboardType(.emailAddress)",
+            "    .textInputAutocapitalization(.never)",
+            "SecureField(\"密码\", text: $secret)",
+            "TextField(\"多行\", text: $multiline, axis: .vertical)",
+            "    .lineLimit(1...3)",
+            "TextEditor(text: $notes)"
+        ].joined(separator: "\n")
+    }
 
     var body: some View {
         Section("文本输入 TextField / TextEditor") {
@@ -277,6 +361,8 @@ struct TextInputBlock: View {
                 .font(.footnote)
                 .scrollContentBackground(.hidden)
                 .background(Color(uiColor: .tertiarySystemFill), in: RoundedRectangle(cornerRadius: 8))
+
+            CodeBlock(api: "TextField · SecureField · TextEditor", code: code)
         }
     }
 }
@@ -285,6 +371,16 @@ struct TextInputBlock: View {
 
 struct LabelsLinksBlock: View {
     @State private var tapped = 0
+
+    private var code: String {
+        [
+            "Label(\"系统标签\", systemImage: \"tag.fill\")",
+            "    .labelStyle(.titleAndIcon)      // .iconOnly / .titleOnly",
+            "LabeledContent(\"版本\", value: \"1.0\")",
+            "Link(\"Apple Developer\", destination: URL(string: \"https://developer.apple.com\")!)",
+            "ShareLink(item: \"iOS 27 控件图鉴\")   // 已点击 \(tapped) 次"
+        ].joined(separator: "\n")
+    }
 
     var body: some View {
         Section("标签 Label / 链接 Link / 分享 ShareLink") {
@@ -308,6 +404,8 @@ struct LabelsLinksBlock: View {
                 Label("点击了 \(tapped) 次", systemImage: "hand.tap")
             }
             .buttonStyle(.bordered)
+
+            CodeBlock(api: "Label · LabeledContent · Link · ShareLink", code: code)
         }
     }
 }
@@ -317,6 +415,17 @@ struct LabelsLinksBlock: View {
 struct StructureBlock: View {
     @State private var expanded = false
     @State private var symbolOn = true
+
+    private var code: String {
+        [
+            "DisclosureGroup(\"高级选项\", isExpanded: $expanded) { … }   // \(expanded ? \"展开\" : \"收起\")",
+            "ControlGroup { Button(\"上一步\") {}; Button(\"下一步\") {} }",
+            "Image(systemName: \"wifi\")",
+            "    .symbolEffect(.variableColor.iterative, isActive: \(symbolOn))",
+            "HStack { … }",
+            "    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))"
+        ].joined(separator: "\n")
+    }
 
     var body: some View {
         Section("结构 DisclosureGroup / ControlGroup / 材料") {
@@ -360,6 +469,8 @@ struct StructureBlock: View {
             }
             .padding(12)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+            CodeBlock(api: "DisclosureGroup · ControlGroup · SymbolEffect · Material", code: code)
         }
     }
 }
@@ -371,6 +482,17 @@ struct PresentationBlock: View {
     @State private var showDialog = false
     @State private var showSheet = false
     @State private var showPopover = false
+
+    private var code: String {
+        [
+            ".alert(\"系统 Alert\", isPresented: $showAlert) { … }",
+            ".confirmationDialog(\"确认删除？\", isPresented: $showDialog) { … }",
+            ".sheet(isPresented: $showSheet) { … }",
+            "    .presentationDetents([.medium, .large])",
+            ".popover(isPresented: $showPopover) { … }",
+            "    .presentationCompactAdaptation(.popover)"
+        ].joined(separator: "\n")
+    }
 
     var body: some View {
         Section("模态 Alert / Dialog / Sheet / Popover") {
@@ -412,6 +534,8 @@ struct PresentationBlock: View {
                         .padding()
                         .presentationCompactAdaptation(.popover)
                 }
+
+            CodeBlock(api: "alert · confirmationDialog · sheet · popover", code: code)
         }
     }
 }
