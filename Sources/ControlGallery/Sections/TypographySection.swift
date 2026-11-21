@@ -3,12 +3,22 @@ import SwiftUI
 struct TypographySection: View {
     @EnvironmentObject private var store: GalleryStore
 
+    private var sampleCode: String {
+        [
+            "Text(\"iOS 27 设计系统\")",
+            "    .font(.largeTitle)",
+            "    \(store.dynamicTypeModifier)",
+            "    \(store.fontDesignModifier)",
+            "    \(store.fontWeightModifier)"
+        ].joined(separator: "\n")
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 SectionHeader(
                     title: "排版",
-                    subtitle: "iOS 可用系统字号 11 级 · Dynamic Type 12 档 · 字体设计与字重"
+                    subtitle: "11 级系统字号 · 12 档 Dynamic Type · 字体设计与字重（代码实时跟随滑块）"
                 )
 
                 GalleryCard {
@@ -64,13 +74,23 @@ struct TypographySection: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
+                CodeBlock(api: "Text · Font · DynamicTypeSize · Font.Design · Font.Weight", code: sampleCode)
+
                 Text("系统文本样式")
                     .font(.headline)
                     .padding(.horizontal, 4)
 
                 ForEach(GalleryCatalog.textStyles) { token in
                     VStack(alignment: .leading, spacing: 2) {
-                        ControlCaption(text: token.id)
+                        HStack {
+                            Text("Font.\(token.id)")
+                                .font(.system(.caption2, design: .monospaced))
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text(".font(.\(token.id))")
+                                .font(.system(.caption2, design: .monospaced))
+                                .foregroundStyle(.tertiary)
+                        }
                         Text(token.sample)
                             .font(token.font)
                             .fontWeight(store.fontWeight)
@@ -83,7 +103,7 @@ struct TypographySection: View {
                 }
 
                 DisclosureGroup("关于 Dynamic Type") {
-                    Text("系统字号全部基于文本样式（TextStyle），随 Dynamic Type 设置缩放。页面顶部的滑块直接改变整个 App 的 Dynamic Type 级别，可以在 xSmall 到 accessibility5 之间切换，观察大标题、正文、脚注如何一起变化。")
+                    Text("系统字号全部基于文本样式（Font.TextStyle），随 Dynamic Type 设置缩放。页面顶部的滑块直接改变整个 App 的 Dynamic Type 级别，可以在 xSmall 到 accessibility5 之间切换；上面的代码块里 .dynamicTypeSize(...) 会同步变化，可直接复制到其他项目。")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
