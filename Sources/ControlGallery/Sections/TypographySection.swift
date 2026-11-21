@@ -8,7 +8,7 @@ struct TypographySection: View {
             VStack(alignment: .leading, spacing: 20) {
                 SectionHeader(
                     title: "排版",
-                    subtitle: "系统字号 13 级 · Dynamic Type 12 档 · 字体设计与字重"
+                    subtitle: "iOS 可用系统字号 11 级 · Dynamic Type 12 档 · 字体设计与字重"
                 )
 
                 GalleryCard {
@@ -72,7 +72,7 @@ struct TypographySection: View {
                     VStack(alignment: .leading, spacing: 2) {
                         ControlCaption(text: token.id)
                         Text(token.sample)
-                            .font(token.style)
+                            .font(token.font)
                             .fontWeight(store.fontWeight)
                             .fontDesign(store.fontDesign)
                             .lineLimit(1)

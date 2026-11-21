@@ -8,24 +8,23 @@ enum GalleryCatalog {
 
     struct TextStyleToken: Identifiable {
         let id: String
-        let style: Font.TextStyle
+        let font: Font
         let sample: String
     }
 
+    /// iOS 可用的系统文本样式（iOS 上的 extraLargeTitle 系列不可用，故不列出）
     static let textStyles: [TextStyleToken] = [
-        .init(id: "extraLargeTitle2", style: .extraLargeTitle2, sample: "控件图鉴"),
-        .init(id: "extraLargeTitle", style: .extraLargeTitle, sample: "控件图鉴"),
-        .init(id: "largeTitle", style: .largeTitle, sample: "大标题 Large Title"),
-        .init(id: "title", style: .title, sample: "标题 Title"),
-        .init(id: "title2", style: .title2, sample: "二级标题 Title 2"),
-        .init(id: "title3", style: .title3, sample: "三级标题 Title 3"),
-        .init(id: "headline", style: .headline, sample: "标题行 Headline"),
-        .init(id: "subheadline", style: .subheadline, sample: "副标题 Subheadline"),
-        .init(id: "body", style: .body, sample: "正文 Body：iOS 27 的系统字号会随 Dynamic Type 缩放。"),
-        .init(id: "callout", style: .callout, sample: "标注 Callout"),
-        .init(id: "footnote", style: .footnote, sample: "脚注 Footnote"),
-        .init(id: "caption", style: .caption, sample: "说明 Caption"),
-        .init(id: "caption2", style: .caption2, sample: "最小说明 Caption 2")
+        .init(id: "largeTitle", font: .largeTitle, sample: "大标题 Large Title"),
+        .init(id: "title", font: .title, sample: "标题 Title"),
+        .init(id: "title2", font: .title2, sample: "二级标题 Title 2"),
+        .init(id: "title3", font: .title3, sample: "三级标题 Title 3"),
+        .init(id: "headline", font: .headline, sample: "标题行 Headline"),
+        .init(id: "subheadline", font: .subheadline, sample: "副标题 Subheadline"),
+        .init(id: "body", font: .body, sample: "正文 Body：iOS 27 的系统字号会随 Dynamic Type 缩放。"),
+        .init(id: "callout", font: .callout, sample: "标注 Callout"),
+        .init(id: "footnote", font: .footnote, sample: "脚注 Footnote"),
+        .init(id: "caption", font: .caption, sample: "说明 Caption"),
+        .init(id: "caption2", font: .caption2, sample: "最小说明 Caption 2")
     ]
 
     // MARK: - Dynamic Type 尺寸级别
@@ -160,7 +159,7 @@ enum GalleryCatalog {
         let size: ControlSize
     }
 
-    /// 按钮/控件默认尺寸阶梯（mini → extraLarge，对应系统最小点击区的不同规格）
+    /// 按钮/控件默认尺寸阶梯（mini → extraLarge）
     static let controlSizes: [ControlSizeToken] = [
         .init(id: "mini", size: .mini),
         .init(id: "small", size: .small),

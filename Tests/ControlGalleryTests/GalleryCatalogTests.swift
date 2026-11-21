@@ -4,7 +4,7 @@ import XCTest
 final class GalleryCatalogTests: XCTestCase {
 
     func testTextStylesAreUniqueAndComplete() {
-        XCTAssertEqual(GalleryCatalog.textStyles.count, 13)
+        XCTAssertEqual(GalleryCatalog.textStyles.count, 11)
         let ids = Set(GalleryCatalog.textStyles.map { $0.id })
         XCTAssertEqual(ids.count, GalleryCatalog.textStyles.count)
         XCTAssertTrue(ids.contains("largeTitle"))
