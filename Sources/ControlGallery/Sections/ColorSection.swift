@@ -4,10 +4,11 @@ struct ColorSection: View {
     @EnvironmentObject private var store: GalleryStore
 
     private var tintCode: String {
-        [
-            store.colorSchemeModifier,
-            store.tintModifier
-        ].joined(separator: "\n")
+        [store.colorSchemeModifier, store.tintModifier].joined(separator: "\n")
+    }
+
+    private var semanticCode: String {
+        "Text(\"正文\")\n    .foregroundStyle(Color(uiColor: .label))\nRectangle().fill(Color(uiColor: .systemBackground))"
     }
 
     var body: some View {
@@ -19,8 +20,7 @@ struct ColorSection: View {
                 )
 
                 GalleryCard {
-                    Text("外观")
-                        .font(.headline)
+                    Text("外观").font(.headline)
                     Picker("外观", selection: $store.colorSchemeChoice) {
                         ForEach(ColorSchemeChoice.allCases) { choice in
                             Text(choice.title).tag(choice)
@@ -31,16 +31,11 @@ struct ColorSection: View {
                     Divider()
 
                     HStack {
-                        Text("系统强调色（tint）")
-                            .font(.headline)
+                        Text("系统强调色（tint）").font(.headline)
                         Spacer()
                         HStack(spacing: 6) {
-                            Circle()
-                                .fill(store.tintColor)
-                                .frame(width: 16, height: 16)
-                            Text(store.tintName)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                            Circle().fill(store.tintColor).frame(width: 16, height: 16)
+                            Text(store.tintName).font(.caption).foregroundStyle(.secondary)
                         }
                     }
 
@@ -53,10 +48,7 @@ struct ColorSection: View {
                                 Circle()
                                     .fill(token.color)
                                     .frame(width: 30, height: 30)
-                                    .overlay {
-                                        Circle()
-                                            .strokeBorder(Color.primary.opacity(0.18), lineWidth: 0.5)
-                                    }
+                                    .overlay { Circle().strokeBorder(Color.primary.opacity(0.18), lineWidth: 0.5) }
                                     .overlay {
                                         if index == store.clampedTintIndex {
                                             Image(systemName: "checkmark")
@@ -73,9 +65,7 @@ struct ColorSection: View {
 
                 CodeBlock(api: "ColorScheme · Color · View.tint(_:)", code: tintCode)
 
-                Text("系统强调色")
-                    .font(.headline)
-                    .padding(.horizontal, 4)
+                Text("系统强调色").font(.headline).padding(.horizontal, 4)
 
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 104), spacing: 12)], spacing: 12) {
                     ForEach(GalleryCatalog.systemColors) { token in
@@ -83,9 +73,7 @@ struct ColorSection: View {
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
                                 .fill(token.color)
                                 .frame(height: 52)
-                            Text(token.id)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                            Text(token.id).font(.caption).foregroundStyle(.secondary)
                             Text("Color.\(token.id)")
                                 .font(.system(.caption2, design: .monospaced))
                                 .foregroundStyle(.tertiary)
@@ -93,9 +81,7 @@ struct ColorSection: View {
                     }
                 }
 
-                Text("语义前景色")
-                    .font(.headline)
-                    .padding(.horizontal, 4)
+                Text("语义前景色").font(.headline).padding(.horizontal, 4)
 
                 GalleryCard {
                     ForEach(GalleryCatalog.semanticForegroundColors) { token in
@@ -103,22 +89,17 @@ struct ColorSection: View {
                             Text("Color(uiColor: .\(token.id))")
                                 .font(.system(.caption2, design: .monospaced))
                                 .foregroundStyle(.tertiary)
-                            Text("Aa 示例")
-                                .font(.body)
-                                .foregroundStyle(token.color)
+                            Text("Aa 示例").font(.body).foregroundStyle(token.color)
                         }
                     }
                 }
 
-                Text("语义背景色")
-                    .font(.headline)
-                    .padding(.horizontal, 4)
+                Text("语义背景色").font(.headline).padding(.horizontal, 4)
 
                 GalleryCard {
                     ForEach(GalleryCatalog.semanticBackgroundColors) { token in
                         HStack {
-                            Text(token.id)
-                                .font(.caption)
+                            Text(token.id).font(.caption)
                             Spacer()
                             RoundedRectangle(cornerRadius: 6, style: .continuous)
                                 .fill(token.color)
@@ -131,10 +112,7 @@ struct ColorSection: View {
                     }
                 }
 
-                CodeBlock(
-                    api: "Color(uiColor:) · UIColor 语义色",
-                    code: "Text(\"正文\")\n    .foregroundStyle(Color(uiColor: .label))\nRectangle().fill(Color(uiColor: .systemBackground))"
-                )
+                CodeBlock(api: "Color(uiColor:) · UIColor 语义色", code: semanticCode)
             }
             .padding(16)
         }
