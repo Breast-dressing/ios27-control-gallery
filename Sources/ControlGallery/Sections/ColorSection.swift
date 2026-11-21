@@ -3,12 +3,19 @@ import SwiftUI
 struct ColorSection: View {
     @EnvironmentObject private var store: GalleryStore
 
+    private var tintCode: String {
+        [
+            store.colorSchemeModifier,
+            store.tintModifier
+        ].joined(separator: "\n")
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 SectionHeader(
                     title: "配色",
-                    subtitle: "系统强调色 13 个 · 语义前景/背景色 · 强调色可切换"
+                    subtitle: "13 个系统强调色 · 语义前景/背景色 · 外观与 tint 代码实时变化"
                 )
 
                 GalleryCard {
@@ -64,6 +71,8 @@ struct ColorSection: View {
                     }
                 }
 
+                CodeBlock(api: "ColorScheme · Color · View.tint(_:)", code: tintCode)
+
                 Text("系统强调色")
                     .font(.headline)
                     .padding(.horizontal, 4)
@@ -77,6 +86,9 @@ struct ColorSection: View {
                             Text(token.id)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+                            Text("Color.\(token.id)")
+                                .font(.system(.caption2, design: .monospaced))
+                                .foregroundStyle(.tertiary)
                         }
                     }
                 }
@@ -87,14 +99,13 @@ struct ColorSection: View {
 
                 GalleryCard {
                     ForEach(GalleryCatalog.semanticForegroundColors) { token in
-                        HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Color(uiColor: .\(token.id))")
+                                .font(.system(.caption2, design: .monospaced))
+                                .foregroundStyle(.tertiary)
                             Text("Aa 示例")
                                 .font(.body)
                                 .foregroundStyle(token.color)
-                            Spacer()
-                            Text(token.id)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -111,7 +122,7 @@ struct ColorSection: View {
                             Spacer()
                             RoundedRectangle(cornerRadius: 6, style: .continuous)
                                 .fill(token.color)
-                                .frame(width: 56, height: 26)
+                                .frame(width: 40, height: 22)
                                 .overlay {
                                     RoundedRectangle(cornerRadius: 6, style: .continuous)
                                         .strokeBorder(Color.secondary.opacity(0.3), lineWidth: 0.5)
@@ -119,6 +130,11 @@ struct ColorSection: View {
                         }
                     }
                 }
+
+                CodeBlock(
+                    api: "Color(uiColor:) · UIColor 语义色",
+                    code: "Text(\"正文\")\n    .foregroundStyle(Color(uiColor: .label))\nRectangle().fill(Color(uiColor: .systemBackground))"
+                )
             }
             .padding(16)
         }
