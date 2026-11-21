@@ -1,11 +1,10 @@
 name: Build & Test
 
-# ios-ci-workflows 的入口文件，工具链固定为 Xcode 27.2（GitHub 托管 xcode-27 镜像）。
-# 所有 App 设置都从 .ios-ci.yml 读取，这里只做编译、测试、打包无签名 IPA。
+# ios-ci-workflows 入口文件：.ios-ci.yml 保存全部设置，ci/build.sh 负责
+# 选 Xcode 27.2、生成工程、跑测试、无签名归档并打成 IPA。
 #
-# 与中央仓库模板的唯一差异：中央可复用工作流的 test job 固定在 macos-26 上，
-# 而 Xcode 27.2 只装在 xcode-27（macOS 27）镜像里，所以本仓库把 Build & Test 就地实现，
-# 其余约定（工具链显式固定、CODE_SIGNING_ALLOWED=NO、产物可核对 Bundle ID）保持一致。
+# 与中央仓库模板的唯一差异：中央可复用工作流的 test job 固定在 macos-26，
+# 而 Xcode 27.2 只装在 xcode-27（macOS 27）镜像里，因此就地实现 Build & Test。
 
 on:
   push:
@@ -29,111 +28,19 @@ jobs:
       run:
         shell: bash
     env:
-      DERIVED_DATA: build/DerivedData
-      OUT: build/out
-      IPA_NAME: ControlGallery-unsigned.ipa
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Read .ios-ci.yml
-        id: cfg
-        run: |
-          set -euo pipefail
-          PROJECT=$(yq -r '.project' .ios-ci.yml)
-          SCHEME=$(yq -r '.scheme' .ios-ci.yml)
-          BUNDLE_ID=$(yq -r '.bundle_id' .ios-ci.yml)
-          XCODE=$(yq -r '.toolchain.xcode' .ios-ci.yml)
-          SIMULATOR=$(yq -r '.toolchain.simulator' .ios-ci.yml)
-          IOS=$(yq -r '.toolchain.ios' .ios-ci.yml)
-          GENERATE=$(yq -r '.generate_command' .ios-ci.yml)
-          test -n "$PROJECT" && test -n "$SCHEME" && test -n "$BUNDLE_ID"
-          {
-            echo "project=$PROJECT"
-            echo "scheme=$SCHEME"
-            echo "bundle_id=$BUNDLE_ID"
-            echo "xcode=$XCODE"
-            echo "simulator=$SIMULATOR"
-            echo "ios=$IOS"
-            echo "generate=$GENERATE"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Select Xcode ${{ steps.cfg.outputs.xcode }}
-        run: |
-          set -euo pipefail
-          APP="/Applications/Xcode_${{ steps.cfg.outputs.xcode }}.app"
-          if [ ! -d "$APP" ]; then
-            echo "::error::$APP not found. Installed:"; ls /Applications | grep Xcode || true; exit 1
-          fi
-          sudo xcode-select -s "$APP"
-          xcodebuild -version
-          xcrun --sdk iphoneos --show-sdk-version
-          xcrun --sdk iphonesimulator --show-sdk-version
-          xcodebuild -showsdks | grep -i ios || true
-
-      - name: Install XcodeGen 2.46.0
-        if: ${{ contains(steps.cfg.outputs.generate, 'xcodegen') }}
-        run: |
-          set -euo pipefail
-          curl -fLsS https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip -o "$RUNNER_TEMP/xcodegen.zip"
-          echo "4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806  $RUNNER_TEMP/xcodegen.zip" | shasum -a 256 -c -
-          unzip -oq "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
-          echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
-
-      - name: Generate project
-        run: |
-          set -euo pipefail
-          mkdir -p "$OUT"
-          ${{ steps.cfg.outputs.generate }} 2>&1 | tee "$OUT/generate.log"
-
-      - name: Build and run tests without signing
-        id: test
-        continue-on-error: true
+      - name: Build, test and package
         run: |
           set -o pipefail
-          set +e
-          xcodebuild test \
-            -project "${{ steps.cfg.outputs.project }}" \
-            -scheme "${{ steps.cfg.outputs.scheme }}" \
-            -destination "platform=iOS Simulator,name=${{ steps.cfg.outputs.simulator }},OS=${{ steps.cfg.outputs.ios }}" \
-            -derivedDataPath "$DERIVED_DATA" \
-            -resultBundlePath "$OUT/Test.xcresult" \
-            CODE_SIGNING_ALLOWED=NO 2>&1 | tee "$OUT/test.log" | xcbeautify --renderer github-actions
-          EXIT=${PIPESTATUS[0]}
-          echo "test_exit=$EXIT" >> "$GITHUB_OUTPUT"
-          exit $EXIT
-
-      - name: Archive without signing
-        run: |
-          set -o pipefail
-          xcodebuild archive \
-            -project "${{ steps.cfg.outputs.project }}" \
-            -scheme "${{ steps.cfg.outputs.scheme }}" \
-            -configuration Release \
-            -destination "generic/platform=iOS" \
-            -archivePath build/App.xcarchive \
-            -derivedDataPath "$DERIVED_DATA" \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGN_ENTITLEMENTS="" \
-            ENABLE_BITCODE=NO 2>&1 | tee "$OUT/archive.log" | xcbeautify --renderer github-actions
-
-      - name: Package unsigned IPA
-        run: |
-          set -euo pipefail
-          APP="build/App.xcarchive/Products/Applications/${{ steps.cfg.outputs.scheme }}.app"
-          test -d "$APP"
-          echo "CFBundleIdentifier: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")"
-          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")" = "${{ steps.cfg.outputs.bundle_id }}"
-          rm -rf build/ipa && mkdir -p build/ipa/Payload
-          cp -R "$APP" build/ipa/Payload/
-          cd build/ipa && zip -qry "../$IPA_NAME" Payload
-          cd ../..
-          unzip -l "build/$IPA_NAME"
-          ls -lh "build/$IPA_NAME"
+          mkdir -p build/out
+          bash ci/build.sh 2>&1 | tee build/out/ci.log
+          exit ${PIPESTATUS[0]}
 
       - name: Upload IPA artifact
+        if: ${{ hashFiles('build/ControlGallery-unsigned.ipa') != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: unsigned-ipa
@@ -141,34 +48,40 @@ jobs:
           retention-days: 30
 
       - name: Publish IPA to release (unsigned-ipa)
+        if: ${{ hashFiles('build/ControlGallery-unsigned.ipa') != '' }}
         run: |
           set -euo pipefail
           gh release view unsigned-ipa >/dev/null 2>&1 || \
             gh release create unsigned-ipa --title "Unsigned IPA (Xcode 27.2)" \
-              --notes "无签名构建产物，由 GitHub Actions 生成。" --latest=false
-          gh release upload unsigned-ipa "build/$IPA_NAME" --clobber
+              --notes "无签名构建产物，由 GitHub Actions 生成。" --latest=true
+          gh release upload unsigned-ipa build/ControlGallery-unsigned.ipa --clobber
 
-      - name: Upload build logs when something fails
-        if: ${{ failure() || steps.test.outcome == 'failure' }}
+      - name: Always publish the build log
+        if: ${{ always() }}
         run: |
           set +e
           gh release view ci-logs >/dev/null 2>&1 || \
-            gh release create ci-logs --title "CI logs" --notes "最近一次失败构建的日志。" --latest=false
-          gh release upload ci-logs "$OUT/test.log" "$OUT/archive.log" --clobber
-          echo "logs uploaded"
+            gh release create ci-logs --title "CI logs" --notes "最近一次构建日志。" --latest=false
+          cp build/out/ci.log build/ci.log 2>/dev/null || true
+          test -f build/ci.log || echo "no log produced" > build/ci.log
+          gh release upload ci-logs build/ci.log --clobber
+          echo "log published"
 
       - name: Summary
         if: ${{ always() }}
         run: |
           {
-            echo "### Build & Test (Xcode ${{ steps.cfg.outputs.xcode }} / iOS ${{ steps.cfg.outputs.ios }})"
+            echo "### Build & Test (Xcode 27.2 / iOS 27.2)"
             echo ""
-            echo "| 项目 | 值 |"
-            echo "| --- | --- |"
-            echo "| scheme | \`${{ steps.cfg.outputs.scheme }}\` |"
-            echo "| bundle id | \`${{ steps.cfg.outputs.bundle_id }}\` |"
-            echo "| simulator | ${{ steps.cfg.outputs.simulator }} (${{ steps.cfg.outputs.ios }}) |"
-            echo "| tests | ${{ steps.test.outcome }} |"
-            echo ""
-            echo "产物：\`ControlGallery-unsigned.ipa\`（Release、无签名、arm64）"
+            echo "- tests: $(cat build/out/test-exit.txt 2>/dev/null || echo 'not run')"
+            echo "- ipa: $(ls -lh build/ControlGallery-unsigned.ipa 2>/dev/null || echo 'not built')"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail if tests failed
+        if: ${{ always() && hashFiles('build/out/test-exit.txt') != '' }}
+        run: |
+          code=$(cat build/out/test-exit.txt)
+          if [ "$code" != "0" ]; then
+            echo "::error::tests failed with exit code $code"
+            exit 1
+          fi
