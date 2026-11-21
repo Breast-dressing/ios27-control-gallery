@@ -4,11 +4,12 @@ struct SpacingSection: View {
     @EnvironmentObject private var store: GalleryStore
 
     private var spacingCode: String {
-        [
+        let scaleText = String(format: "%.2f", store.spacingScale)
+        return [
             "VStack(spacing: \(Int(store.spacingValue(24)))) {",
             "    Text(\"间距\")",
             "}",
-            ".padding(\(Int(store.spacingValue(16))))   // 基准 16pt × \(String(format: \"%.2f\", store.spacingScale))"
+            ".padding(\(Int(store.spacingValue(16))))   // 基准 16pt × \(scaleText)"
         ].joined(separator: "\n")
     }
 
