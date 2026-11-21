@@ -4,6 +4,13 @@ struct ContainerSection: View {
     @EnvironmentObject private var store: GalleryStore
     @State private var pageIndex = 0
 
+    private var listStyleCode: String {
+        [
+            "List { … }",
+            "    \(store.listStyleSample)"
+        ].joined(separator: "\n")
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             Picker("列表样式", selection: $store.listStyleChoice) {
@@ -48,6 +55,11 @@ struct ContainerSection: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
+
+                CodeBlock(
+                    api: "GroupBox",
+                    code: "GroupBox(\"系统 GroupBox\") {\n    Text(\"内容\")\n}"
+                )
             }
 
             Section("网格 Grid / LazyVGrid") {
@@ -81,6 +93,11 @@ struct ContainerSection: View {
                             .background(Color(uiColor: .tertiarySystemFill), in: RoundedRectangle(cornerRadius: 6))
                     }
                 }
+
+                CodeBlock(
+                    api: "Grid · GridRow · LazyVGrid · GridItem",
+                    code: "Grid(horizontalSpacing: 12, verticalSpacing: 12) {\n    GridRow { Text(\"Token\"); Text(\"Value\") }\n}\nLazyVGrid(columns: [GridItem(.adaptive(minimum: 92))]) { … }"
+                )
             }
 
             Section("横向滚动 ScrollView") {
@@ -99,6 +116,11 @@ struct ContainerSection: View {
                     }
                     .padding(.vertical, 4)
                 }
+
+                CodeBlock(
+                    api: "ScrollView(_:showsIndicators:) · Axis",
+                    code: "ScrollView(.horizontal, showsIndicators: false) {\n    HStack(spacing: 10) { … }\n}"
+                )
             }
 
             Section("分页 TabView") {
@@ -112,6 +134,11 @@ struct ContainerSection: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .always))
                 .frame(height: 150)
+
+                CodeBlock(
+                    api: "TabView(selection:) · PageTabViewStyle",
+                    code: "TabView(selection: $pageIndex) {\n    Text(\"第一页\").tag(0)\n}\n.tabViewStyle(.page(indexDisplayMode: .always))   // 当前第 \(pageIndex + 1) 页"
+                )
             }
 
             Section("导航 NavigationLink") {
@@ -120,12 +147,18 @@ struct ContainerSection: View {
                 } label: {
                     Label("关于本 App 与工具链", systemImage: "info.circle")
                 }
+
+                CodeBlock(
+                    api: "NavigationStack · NavigationLink",
+                    code: "NavigationStack {\n    NavigationLink(\"关于\") { AboutSection() }\n}"
+                )
             }
 
             Section {
-                Text("列表样式由顶部 Picker 切换：insetGrouped / grouped / plain / sidebar。")
+                Text("列表样式由顶部 Picker 切换：insetGrouped / grouped / plain / sidebar，下面的代码同步。")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+                CodeBlock(api: "ListStyle · View.listStyle(_:)", code: listStyleCode)
             }
         }
     }
