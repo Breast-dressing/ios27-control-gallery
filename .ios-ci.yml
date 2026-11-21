@@ -1,0 +1,23 @@
+# ios-ci-workflows 配置（已按 Xcode 27.2 / iOS 27.2 SDK 适配）
+workdir: .
+project: ControlGallery.xcodeproj
+scheme: ControlGallery
+bundle_id: com.breastdressing.controlgallery
+display_name: 控件图鉴
+sync_command: 'true'
+generate_command: xcodegen generate
+icon_path: ''
+
+toolchain:
+  xcode: '27.2'
+  simulator: iPhone 18 Pro
+  ios: '27.2'
+
+build_test:
+  test_plan: ''
+  accessibility_audit: warn
+  commit_recorded_snapshots: false
+
+testflight:
+  entitlement_mode: none
+  acceptance_issue: false
