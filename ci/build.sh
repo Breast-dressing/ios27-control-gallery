@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Build & Test 的实际逻辑：所有设置从 .ios-ci.yml 读取，工具链固定 Xcode 27.2。
+# 注意：test/archive 两个阶段都输出完整日志，便于失败时直接从 ci.log 定位。
 set -euo pipefail
 
 OUT=build/out
