@@ -29,6 +29,11 @@ struct RootView: View {
                 ContainerSection()
             }
             .tabItem { Label("形态", systemImage: "square.on.square") }
+
+            NavigationStack {
+                NewComponentsSection()
+            }
+            .tabItem { Label("数字", systemImage: "dial.medium") }
         }
     }
 }
