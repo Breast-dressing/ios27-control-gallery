@@ -285,10 +285,8 @@ struct CameraDialBlock: View {
                     in: 0...100,
                     step: 1,
                     label: { Text("微调") },
-                    ticks: {
-                        SliderTick(0.0)
-                        SliderTick(50.0)
-                        SliderTick(100.0)
+                    tick: { value in
+                        Int(value) % 25 == 0 ? SliderTick(value) : nil
                     }
                 )
             }
