@@ -1,31 +1,25 @@
 #!/usr/bin/env bash
-# 用 swift-api-digester dump SwiftUI 符号，再根据关键词筛出候选 API。
+# 在 SwiftUI 的 arm64e swiftinterface 里检索候选 API。
 set -uo pipefail
 
 APP=/Applications/Xcode_27.2.app
 sudo xcode-select -s "$APP"
 SDK=$(xcrun --sdk iphoneos --show-sdk-path)
-echo "SDK=$SDK"
-echo "xcodebuild: $(xcodebuild -version | tr '\n' ' ')"
-
 MODDIR="$SDK/System/Library/Frameworks/SwiftUI.framework/Modules/SwiftUI.swiftmodule"
-echo "== module dir =="
-ls "$MODDIR" | head -20
-for f in "$MODDIR"/*.swiftinterface; do [ -f "$f" ] && wc -l "$f"; done
+FI=$(find "$MODDIR" -name '*apple-ios.swiftinterface' | head -1)
+echo "INTERFACE=$FI"
+wc -l "$FI"
 
-JSON=/tmp/swiftui.json
-echo "== api digester =="
-xcrun swift-api-digester -dump-sdk \
-  -module SwiftUI \
-  -o "$JSON" \
-  -target arm64-apple-ios27.2 \
-  -sdk "$SDK" 2>&1 | tail -8
-ls -lh "$JSON" 2>/dev/null || echo "dump failed"
-
-if [ -s "$JSON" ]; then
-  echo "== names matching keywords =="
-  grep -oE '"name" : "[^"]*"' "$JSON" | sed 's/"name" : //' | grep -iE 'tick|counter|dial|knob|wheel|numeric|slider|gauge|stepper|shutter|camera' | sort -u | head -120
+show() {
   echo ""
-  echo "== decl fragments =="
-  grep -oE '"printedName" : "[^"]*"' "$JSON" | sed 's/"printedName" : //' | grep -iE 'tick|counter|dial|knob|numeric' | sort -u | head -80
-fi
+  echo "######## $1"
+  grep -niE "$1" "$FI" | head -50
+}
+
+show 'tick'
+show 'public struct .*Counter|public enum .*Counter'
+show 'Dial|Knob|Shutter'
+show 'numericText|contentTransition'
+show 'Wheel|DialStyle|Dial.value'
+show 'public struct Slider'
+show 'pickerStyle.*wheel|WheelPicker'
