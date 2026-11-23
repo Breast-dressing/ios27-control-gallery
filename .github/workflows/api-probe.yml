@@ -1,0 +1,37 @@
+# 一次性探针：在 Xcode 27.2 的 iOS 27.2 SDK 里检索与「计数器 / 刻度轮盘 / 相机调节盘」相关的真实 API 名称。
+# 结果写入 Release api-probe，路径只是触发条件（push 到 probe/** 才会跑）。
+
+name: API Probe (Xcode 27.2)
+
+on:
+  push:
+    branches: [main]
+    paths: ['probe/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: xcode-27
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe SwiftUI SDK
+        run: |
+          set -o pipefail
+          mkdir -p build/out
+          bash ci/probe.sh 2>&1 | tee build/out/probe.log
+          exit ${PIPESTATUS[0]}
+      - name: Publish probe log
+        if: ${{ always() }}
+        run: |
+          set +e
+          gh release view api-probe >/dev/null 2>&1 || \
+            gh release create api-probe --title "API probe (Xcode 27.2)" --notes "SDK 符号探针输出。" --latest=false
+          cp build/out/probe.log build/probe.log 2>/dev/null || true
+          test -f build/probe.log || echo 'no log' > build/probe.log
+          gh release upload api-probe build/probe.log --clobber
